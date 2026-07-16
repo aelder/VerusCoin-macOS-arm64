@@ -1228,7 +1228,7 @@ public:
     bool IsVerusPBaaSAvailable();
     bool IsNotaryAvailable(bool callToCheck=false);
     bool ConfigureEthBridge(bool callToCheck=false);
-    void CheckOracleUpgrades();
+    void CheckOracleUpgrades(uint32_t atHeight=0);
     bool IsUpgradeActive(const uint160 &upgradeID, uint32_t blockHeight=UINT32_MAX, uint32_t blockTime=UINT32_MAX) const;
     uint32_t GetZeroViaHeight(bool getVerusHeight) const;
     uint32_t GetOptimizedETHProofHeight(bool getVerusHeight=false) const;

@@ -3724,7 +3724,7 @@ static DisconnectResult DisconnectBlock(const CBlock& block, CValidationState& s
         }
     }
     // unwind any consensus upgrades that may have been removed in the block
-    ConnectedChains.CheckOracleUpgrades();
+    ConnectedChains.CheckOracleUpgrades(pindex->pprev->GetHeight());
     return fClean ? DISCONNECT_OK : DISCONNECT_UNCLEAN;
 }
 
@@ -3851,7 +3851,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     }
 
     SetMaxScriptElementSize(nHeight);
-    ConnectedChains.CheckOracleUpgrades();
+    ConnectedChains.CheckOracleUpgrades(nHeight);
 
     if (CConstVerusSolutionVector::GetVersionByHeight(nHeight) >= CActivationHeight::ACTIVATE_PBAAS)
     {
@@ -7746,6 +7746,12 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
                 return error("VerifyDB(): *** Error (%s) found unconnectable block at %d, hash=%s", state.GetRejectReason().c_str(), pindex->GetHeight(), pindex->GetBlockHash().ToString());
             }
         }
+    }
+
+    if (nCheckLevel >= 3)
+    {
+        // reset oracle notifications to the tip, if changed
+        ConnectedChains.CheckOracleUpgrades();
     }
 
     LogPrintf("No coin database inconsistencies in last %i blocks (%i transactions)\n", chainActive.Height() - pindexState->GetHeight(), nGoodTransactions);
