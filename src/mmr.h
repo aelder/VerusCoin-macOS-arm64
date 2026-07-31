@@ -730,24 +730,25 @@ public:
             bool error = false;
             for (int i = 0; i < proofSize && !error; i++)
             {
+                uint8_t branchType = 0;
+                union {
+                    CBTCMerkleBranch *pBranch;
+                    CMMRNodeBranch *pNodeBranch;
+                    CMMRPowerNodeBranch *pPowerNodeBranch;
+                    CMerkleBranchBase *pobj;
+                    CETHPATRICIABranch *pETHBranch;
+                    CMultiPartProof *pMultiProofBranch;
+                };
+
+                // non-error exception comes from the first try on each object. after this, it is an error
+                pobj = nullptr;
+                bool manualDelete = false;
+
                 try
                 {
                     // our normal way out is an exception at end of stream
                     // would prefer a better way
-                    uint8_t branchType;
                     READWRITE(branchType);
-
-                    union {
-                        CBTCMerkleBranch *pBranch;
-                        CMMRNodeBranch *pNodeBranch;
-                        CMMRPowerNodeBranch *pPowerNodeBranch;
-                        CMerkleBranchBase *pobj;
-                        CETHPATRICIABranch *pETHBranch;
-                        CMultiPartProof *pMultiProofBranch;
-                    };
-
-                    // non-error exception comes from the first try on each object. after this, it is an error
-                    pobj = nullptr;
 
                     switch(branchType)
                     {
@@ -806,19 +807,69 @@ public:
 
                     if (pobj)
                     {
-                        proofSequence.push_back(pobj);
+                        if (pobj->branchType == branchType)
+                        {
+                            proofSequence.push_back(pobj);
+                        }
+                        else
+                        {
+                            manualDelete = true;
+                        }
                     }
                 }
                 catch(const std::exception& e)
                 {
                     error = true;
+                    if (pobj)
+                    {
+                        manualDelete = true;
+                    }
+                }
+
+                if (manualDelete)
+                {
+                    error = true;
+                    switch(branchType)
+                    {
+                        case CMerkleBranchBase::BRANCH_BTC:
+                        {
+                            delete pBranch;
+                            break;
+                        }
+                        case CMerkleBranchBase::BRANCH_MMRBLAKE_NODE:
+                        {
+                            delete pNodeBranch;
+                            break;
+                        }
+                        case CMerkleBranchBase::BRANCH_MMRBLAKE_POWERNODE:
+                        {
+                            delete pPowerNodeBranch;
+                            break;
+                        }
+                        case CMerkleBranchBase::BRANCH_ETH:
+                        {
+                            delete pETHBranch;
+                            break;
+                        }
+                        case CMerkleBranchBase::BRANCH_MULTIPART:
+                        {
+                            delete pMultiProofBranch;
+                            break;
+                        }
+                        default:
+                        {
+                            printf("%s: ERROR: should never get here - proof sequence is likely corrupt, code %d\n", __func__, branchType);
+                            LogPrintf("%s: ERROR: should never get here - proof sequence is likely corrupt, code %d\n", __func__, branchType);
+                        }
+                    }
+                    pobj = nullptr;
                 }
             }
 
             if (error)
             {
                 printf("%s: ERROR: failure - proof sequence is likely corrupt\n", __func__);
-                LogPrintf("%s: ERROR: proof sequence is likely corrupt\n", __func__);
+                LogPrintf("%s: ERROR: failure - proof sequence is likely corrupt\n", __func__);
                 DeleteProofSequence();
             }
         }
