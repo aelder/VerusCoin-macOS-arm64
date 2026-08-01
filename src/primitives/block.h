@@ -1494,8 +1494,8 @@ public:
 
             if (error)
             {
-                printf("%s: ERROR: opret is likely corrupt\n", __func__);
-                LogPrintf("%s: ERROR: opret is likely corrupt\n", __func__);
+                printf("%s: ERROR: proof is likely corrupt\n", __func__);
+                LogPrintf("%s: ERROR: proof is likely corrupt\n", __func__);
                 DeleteOpRetObjects(chainObjects);
             }
         }

@@ -314,15 +314,16 @@ void *chainparams_commandline(void *ptr)
                     (1053660, uint256S("0x0000000000182c0fcba3ae9360417848dd03a8e0cb153f1ee8b4b8f72376de2b"))
                     (1796400, uint256S("0xeead7e4b5236de7c9fd782d28efa0a288d9188fd40ba7ca9804983035435caec"))
                     (2549420, uint256S("0x000000000000e1d2915791640dcee0bf36141cc58d436e158fcf126e529083a3"))
-                    (2802250, uint256S("0x000000000002a5c44fd73dab43b2e0cac0dd2b5be6a22d03df5283ca8ee1f8bc")),
-                    (int64_t)1700525524,    // * UNIX timestamp of last checkpoint block
-                    (int64_t)6318742,         // * total number of transactions between genesis and last checkpoint
+                    (2802250, uint256S("0x000000000002a5c44fd73dab43b2e0cac0dd2b5be6a22d03df5283ca8ee1f8bc"))
+                    (4145320, uint256S("0x8223ff757d84a56452e2a1e0b287c0363df49af3a18ba53380c71f4d3b408883")),
+                    (int64_t)1783684704,    // * UNIX timestamp of last checkpoint block
+                    (int64_t)13703116,        // * total number of transactions between genesis and last checkpoint
                                             //   (the tx=... number in the SetBestChain debug.log lines)
-                    (double)1298            // * estimated number of transactions per day after checkpoint
+                    (double)1904            // * estimated number of transactions per day after checkpoint
                                             //   total number of tx / (checkpoint block height / (24 * 24))
                 };
 
-            mainParams.consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000026e5624a2f47b71ea49cda473");
+            mainParams.consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000026e5624ab190cf1efbb7a8266");
         }
         else
         {

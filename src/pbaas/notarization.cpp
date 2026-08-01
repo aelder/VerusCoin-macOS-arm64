@@ -10097,9 +10097,17 @@ bool IsNotarizationDescendent(const CPBaaSNotarization &checkNotarization,
 
 bool PreCheckAcceptedOrEarnedNotarization(const CTransaction &tx, int32_t outNum, CValidationState &state, uint32_t height)
 {
-    if (IsVerusMainnetActive() && height < 1567999)
+    bool skipEnhancedCheck = false;
+    if (IsVerusMainnetActive())
     {
-        return true;
+        if (height < 1567999)
+        {
+            return true;
+        }
+        if (height <= 4162957)
+        {
+            skipEnhancedCheck = true;
+        }
     }
 
     // though it would fail below, simplify failure messages pre-pbaas
@@ -10115,6 +10123,7 @@ bool PreCheckAcceptedOrEarnedNotarization(const CTransaction &tx, int32_t outNum
           (p.evalCode == EVAL_ACCEPTEDNOTARIZATION || p.evalCode == EVAL_EARNEDNOTARIZATION) &&
           p.vData.size() &&
           (currentNotarization = CPBaaSNotarization(p.vData[0])).IsValid() &&
+          (skipEnhancedCheck || ::AsVector(currentNotarization) == p.vData[0]) &&
           currentNotarization.currencyState.IsValid() &&
           currentNotarization.currencyState.GetID() == currentNotarization.currencyID &&
           p.IsEvalPKOut()))
@@ -10312,6 +10321,31 @@ bool PreCheckAcceptedOrEarnedNotarization(const CTransaction &tx, int32_t outNum
             // accepted notarizations may include chain roots from currently confirmed notarizations
             if (p.evalCode == EVAL_ACCEPTEDNOTARIZATION)
             {
+                if (height != 1 && !skipEnhancedCheck && !currentNotarization.IsPreLaunch())
+                {
+                    bool isImportNotarization = false;
+                    for (int curOut = outNum - 1; curOut >= 0; curOut--)
+                    {
+                        COptCCParams importP;
+                        CCrossChainImport cciForNot, sysCCI;
+                        CCrossChainExport ccxForNot;
+                        CPBaaSNotarization checkNot;
+                        int32_t sysCCIOut, importNotOut, eOutStart, eOutEnd;
+                        std::vector<CReserveTransfer> rTransfers;
+                        if ((cciForNot = CCrossChainImport(tx.vout[curOut].scriptPubKey)).IsValid() &&
+                            cciForNot.GetImportInfo(tx, height, curOut, ccxForNot, sysCCI, sysCCIOut, checkNot, importNotOut, eOutStart, eOutEnd, rTransfers) &&
+                            importNotOut == outNum)
+                        {
+                            isImportNotarization = true;
+                            break;
+                        }
+                    }
+                    if (!isImportNotarization)
+                    {
+                        return state.Error("Invalid accepted notarization");
+                    }
+                }
+
                 // this should only be present as an accepted notarization for the notary chain in any normal case
                 // on an import transaction.
                 // ensure that the proof root accurately reflects the last earned and confirmed notarization.
@@ -11084,8 +11118,9 @@ bool PreCheckNotaryEvidence(const CTransaction &tx, int32_t outNum, CValidationS
           p.IsValid() &&
           p.evalCode == EVAL_NOTARY_EVIDENCE &&
           p.vData.size() &&
-          (currentEvidence = CNotaryEvidence(p.vData[0])).IsValid()) &&
-          p.IsEvalPKOut())
+          (currentEvidence = CNotaryEvidence(p.vData[0])).IsValid() &&
+          p.IsEvalPKOut() &&
+          ::AsVector(currentEvidence) == p.vData[0]))
     {
         return state.Error("Invalid notary evidence output");
     }
@@ -11365,7 +11400,8 @@ bool PreCheckFinalizeNotarization(const CTransaction &tx, int32_t outNum, CValid
           p.vData.size() &&
           (currentFinalization = CObjectFinalization(p.vData[0])).IsValid() &&
           p.IsEvalPKOut() &&
-          currentFinalization.FinalizationType() == CObjectFinalization::EFinalizationType::FINALIZE_NOTARIZATION))
+          currentFinalization.FinalizationType() == CObjectFinalization::EFinalizationType::FINALIZE_NOTARIZATION &&
+          ::AsVector(currentFinalization) == p.vData[0]))
     {
         return state.Error("Invalid finalization for notarization output");
     }

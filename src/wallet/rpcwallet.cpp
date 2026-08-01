@@ -651,7 +651,8 @@ std::string SignMessageHash(const CIdentity &identity, const uint256 &_msgHash, 
 {
     int numSigs = 0;
 
-    CIdentitySignature signature;
+    // version compatibility with version 1 signatures
+    CIdentitySignature signature(CCurrencyDefinition::EHashTypes::HASH_BLAKE2BMMR, CIdentitySignature::VERSION_VERUSID);
     bool fInvalid = false;
 
     CHashWriterSHA256 ss(SER_GETHASH, PROTOCOL_VERSION);
@@ -690,13 +691,15 @@ std::string SignMessageHash(const CIdentity &identity, const uint256 &_msgHash, 
         if (sigVec.size())
         {
             signature = CIdentitySignature(sigVec);
+            if (signature.version != CIdentitySignature::VERSION_VERUSID)
+            {
+                throw JSONRPCError(RPC_INVALID_PARAMS, "Cannot combine version 1 and version 2 signatures for a multisig");
+            }
         }
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
-        sigVec.clear();
-        signature = CIdentitySignature();
+        throw JSONRPCError(RPC_INVALID_PARAMS, "Exception reading or creating signature. Original: " + std::string(e.what()));
     }
 
     signature.blockHeight = blockHeight;
@@ -1231,6 +1234,7 @@ size_t GetDataMessage(const UniValue &uni, CVDXF::EHashTypes hashType, std::vect
     return dataVec.size();
 }
 
+typedef boost::variant<CMerkleMountainRange<CMMRNode<CBLAKE2bWriter>>, CMerkleMountainRange<CMMRNode<CKeccack256Writer>>, CMerkleMountainRange<CMMRNode<CHashWriterSHA256>>, CMerkleMountainRange<CMMRNode<CHashWriter>>> SigningMMR;
 UniValue signdata(const UniValue& params, bool fHelp)
 {
     if (!EnsureWalletIsAvailable(fHelp))
@@ -1548,8 +1552,6 @@ UniValue signdata(const UniValue& params, bool fHelp)
         mmrHashTypeStr = hashTypeStr;
     }
 
-    typedef boost::variant<CMerkleMountainRange<CMMRNode<CBLAKE2bWriter>>, CMerkleMountainRange<CMMRNode<CKeccack256Writer>>, CMerkleMountainRange<CMMRNode<CHashWriterSHA256>>, CMerkleMountainRange<CMMRNode<CHashWriter>>> SigningMMR;
-
     SigningMMR mmr;
 
     if (mmrHashTypeStr == "sha256")
@@ -1632,6 +1634,7 @@ UniValue signdata(const UniValue& params, bool fHelp)
             }
             else
             {
+                UniValue checkMessage = find_value(oneItem, "message");
                 if (mmrSaltUni.size() || createMMR)
                 {
                     CSaltedData saltedObject(dataVec);
@@ -1641,6 +1644,11 @@ UniValue signdata(const UniValue& params, bool fHelp)
                     }
                     mmrSalt.push_back(saltedObject.salt);
                     msgHash = saltedObject.GetHash(hw);
+                }
+                else if (checkMessage.isStr())
+                {
+                    hw << checkMessage.get_str();
+                    msgHash = hw.GetHash();
                 }
                 else
                 {

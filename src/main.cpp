@@ -9910,7 +9910,9 @@ bool ProcessMessages(CNode* pfrom)
         {
             LogPrintf("%s(%s, %u bytes): CHECKSUM ERROR nChecksum=%08x hdr.nChecksum=%08x\n", __func__,
                       SanitizeString(strCommand), nMessageSize, nChecksum, hdr.nChecksum);
-            continue;
+            Misbehaving(pfrom->GetId(), 100);
+            fOk = false;
+            break;
         }
 
         // Process message

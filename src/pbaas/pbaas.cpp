@@ -522,6 +522,7 @@ bool PrecheckCrossChainImport(const CTransaction &tx, int32_t outNum, CValidatio
         p.vData.size() > 1 &&
         p.IsEvalPKOut() &&
         (cci = CCrossChainImport(p.vData[0])).IsValid() &&
+        ::AsVector(cci) == p.vData[0] &&
         cci.GetImportInfo(tx, height, outNum, ccx, sysCCI, sysOutNum, notarization, notarizationOut, evidenceOutStart, evidenceOutEnd, reserveTransfers, state, deepCheckImportProof))
     {
         // if this is a source system cci, get the base
@@ -1448,6 +1449,7 @@ bool PrecheckCrossChainExport(const CTransaction &tx, int32_t outNum, CValidatio
           p.evalCode == EVAL_CROSSCHAIN_EXPORT &&
           p.vData.size() &&
           (ccx = CCrossChainExport(p.vData[0])).IsValid() &&
+          ::AsVector(ccx) == p.vData[0] &&
           (ccx.IsSupplemental() ||
            (ccx.sourceSystemID == ASSETCHAINS_CHAINID &&
             ccx.numInputs < tx.vin.size() &&
@@ -2326,6 +2328,7 @@ bool PreCheckFinalizeExport(const CTransaction &tx, int32_t outNum, CValidationS
           p.IsEvalPKOut() &&
           p.vData.size() &&
           (of = CObjectFinalization(p.vData[0])).IsValid() &&
+          ::AsVector(of) == p.vData[0] &&
           of.FinalizationType() == CObjectFinalization::EFinalizationType::FINALIZE_EXPORT))
     {
         return state.Error("Invalid export finalization output");
@@ -4082,7 +4085,8 @@ bool PrecheckCurrencyDefinition(const CTransaction &tx, int32_t outNum, CValidat
           currencyOptParams.IsValid() &&
           currencyOptParams.evalCode == EVAL_CURRENCY_DEFINITION &&
           currencyOptParams.vData.size() > 1 &&
-          (newCurrency = CCurrencyDefinition(currencyOptParams.vData[0])).IsValid()))
+          (newCurrency = CCurrencyDefinition(currencyOptParams.vData[0])).IsValid() &&
+          ::AsVector(newCurrency) == currencyOptParams.vData[0]))
     {
         return state.Error("Invalid currency definition in output");
     }
@@ -5074,7 +5078,8 @@ bool PrecheckReserveTransfer(const CTransaction &tx, int32_t outNum, CValidation
         (rt = CReserveTransfer(p.vData[0])).IsValid() &&
         rt.TotalCurrencyOut().valueMap[ASSETCHAINS_CHAINID] == tx.vout[outNum].nValue &&
         (rt.IsArbitrageOnly() || p.IsEvalPKOut()) &&
-        rt.destination.AuxDestCount() <= 3)
+        rt.destination.AuxDestCount() <= 3 &&
+        ::AsVector(rt) == p.vData[0])
     {
         // arbitrage transactions are determined by their context and statically setting the flags is prohibited
         if (rt.IsArbitrageOnly() &&
