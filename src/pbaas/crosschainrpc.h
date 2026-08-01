@@ -1832,6 +1832,7 @@ static const int VERUS_STAKE_EXPLOIT_RESTORED_HEIGHT = 1576200;         // heigh
 static const uint32_t PBAAS_VERSION8_SOLUTION_TIME_START = 1783443600;  //Tuesday, July 7, 2026 at 5:00:00 PM
 static const uint32_t PBAAS_BRIDGEEXPLOIT_CLEANUP_TIME_START = 1783443600; // ""
 static const uint32_t PBAAS_BRIDGEEXPLOIT_CLEANUP_TIME_END = 1783620000; // Thursday, July 9, 2026 at 6:00:00 PM UTC
+static const uint32_t PBAAS_TESTNET_IDENTITY_START_CHECKSER = 1785542400; // Saturday, August 1, 2026 at 12:00:00 AM UTC
 
 extern std::map<uint160,CTransferDestination> bridgeAdjustingAddresses;
 CCurrencyValueMap &BridgeCurrencyAdjustmentMap();

@@ -2496,8 +2496,9 @@ bool PrecheckIdentityPrimary(const CTransaction &tx, int32_t outNum, CValidation
                 case EVAL_IDENTITY_PRIMARY:
                 {
                     checkIdentity = CIdentity(p.vData[0]);
-                    if (!checkIdentity.IsValid() ||
-                        ::AsVector(checkIdentity) != p.vData[0])
+                    if (!(IsVerusActive() && PBAAS_TESTMODE && chainActive[std::min((uint32_t)chainActive.Height(), height - 1)]->nTime < PBAAS_TESTNET_IDENTITY_START_CHECKSER) &&
+                        (!checkIdentity.IsValid() ||
+                         ::AsVector(checkIdentity) != p.vData[0]))
                     {
                         return state.Error("Invalid identity on transaction output " + std::to_string(i));
                     }
