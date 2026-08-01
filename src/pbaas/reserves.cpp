@@ -7884,8 +7884,9 @@ bool PrecheckReserveDeposit(const CTransaction &tx, int32_t outNum, CValidationS
         p.evalCode == EVAL_RESERVE_DEPOSIT &&
         p.vData.size() &&
         (rd = CReserveDeposit(p.vData[0])).IsValid() &&
-        rd.reserveValues.valueMap[ASSETCHAINS_CHAINID] == tx.vout[outNum].nValue &&
-        p.IsEvalPKOut())
+        rd.reserveValues.ValueOf(ASSETCHAINS_CHAINID) == tx.vout[outNum].nValue &&
+        p.IsEvalPKOut() &&
+        ::AsVector(rd) == p.vData[0])
     {
         return true;
     }

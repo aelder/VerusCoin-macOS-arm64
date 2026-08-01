@@ -433,15 +433,34 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
         READWRITE(version);
-        int vecSize = challengeOutputs.size();
-        READWRITE(VARINT(vecSize));
-        if (challengeOutputs.size() != vecSize)
+        if (ser_action.ForRead())
         {
-            challengeOutputs.resize(vecSize);
+            int vecSize = 0;
+            READWRITE(VARINT(vecSize));
+            if (vecSize < 0)
+            {
+                throw std::ios_base::failure("CPrimaryProofDescriptor: negative challengeOutputs count");
+            }
+            challengeOutputs.clear();
+            // never pre-allocate on an untrusted count. past this bound, the vector grows only
+            // as elements actually arrive (36 wire bytes each), so a short stream throws long
+            // before memory becomes a problem
+            challengeOutputs.reserve(vecSize < 1024 ? vecSize : 1024);
+            for (int i = 0; i < vecSize; i++)
+            {
+                CUTXORef oneElem;
+                READWRITE(oneElem);
+                challengeOutputs.push_back(oneElem);
+            }
         }
-        for (auto &oneElem : challengeOutputs)
+        else
         {
-            READWRITE(oneElem);
+            int vecSize = challengeOutputs.size();
+            READWRITE(VARINT(vecSize));
+            for (auto &oneElem : challengeOutputs)
+            {
+                READWRITE(oneElem);
+            }
         }
     }
 

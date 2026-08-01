@@ -2793,10 +2793,9 @@ bool SelectArbitrageFromOffers(const std::vector<
                     objParam.pushKV("changeaddress", EncodeDestination(VERUS_DEFAULT_ARBADDRESS));
 
                     // make a CTxOut for the reserve transfer in, and serialize it
-                    // TODO BRIDGE CLEANUP: verify that we do not need the CC address in dests for an arbitrage reserve transfer, no change until verification
                     CCcontract_info CC;
                     CCcontract_info *cp = CCinit(&CC, EVAL_RESERVE_TRANSFER);
-                    std::vector<CTxDestination> dests({DecodeDestination(cp->unspendableCCaddr), VERUS_DEFAULT_ARBADDRESS});
+                    std::vector<CTxDestination> dests({VERUS_DEFAULT_ARBADDRESS});
                     CScript scriptOut = MakeMofNCCScript(CConditionObj<CReserveTransfer>(EVAL_RESERVE_TRANSFER, dests, 1, &std::get<3>(mostProfitablePair).second));
 
                     CCurrencyValueMap totalOut = std::get<3>(mostProfitablePair).second.reserveValues;

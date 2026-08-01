@@ -438,6 +438,12 @@ public:
     const CCurrencyValueMap &operator-=(const CCurrencyValueMap& operand);
     const CCurrencyValueMap &operator+=(const CCurrencyValueMap& operand);
 
+    int64_t ValueOf(const uint160 &currencyID) const
+    {
+        auto it = valueMap.find(currencyID);
+        return it == valueMap.end() ? 0 : it->second;
+    }
+
     // determine if the operand intersects this map
     bool Intersects(const CCurrencyValueMap& operand) const;
     CCurrencyValueMap CanonicalMap() const;
@@ -1330,8 +1336,8 @@ public:
         VERSION_INVALID = 0,
         VERSION_VERUSID = 1,
         VERSION_FIRST = 1,
-        VERSION_DEFAULT = 1,
         VERSION_ETHBRIDGE = 2,
+        VERSION_DEFAULT = 2,
         VERSION_LAST = 2
     };
 
@@ -1831,5 +1837,6 @@ extern std::map<uint160,CTransferDestination> bridgeAdjustingAddresses;
 CCurrencyValueMap &BridgeCurrencyAdjustmentMap();
 bool IsBridgeCleanupWindowOpen(uint32_t chainTime);
 bool IsAfterBridgeCleanupWindowStarts(uint32_t chainTime);
+bool IsAfterSecondBridgeCleanupWindowStarts(uint32_t chainTime);
 
 #endif

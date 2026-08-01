@@ -2479,7 +2479,8 @@ bool PrecheckIdentityPrimary(const CTransaction &tx, int32_t outNum, CValidation
                 case EVAL_IDENTITY_ADVANCEDRESERVATION:
                 {
                     advNameRes = CAdvancedNameReservation(p.vData[0]);
-                    if (!advNameRes.IsValid())
+                    if (!advNameRes.IsValid() ||
+                        ::AsVector(advNameRes) != p.vData[0])
                     {
                         return state.Error("Invalid identity reservation");
                     }
@@ -2495,7 +2496,8 @@ bool PrecheckIdentityPrimary(const CTransaction &tx, int32_t outNum, CValidation
                 case EVAL_IDENTITY_PRIMARY:
                 {
                     checkIdentity = CIdentity(p.vData[0]);
-                    if (!checkIdentity.IsValid())
+                    if (!checkIdentity.IsValid() ||
+                        ::AsVector(checkIdentity) != p.vData[0])
                     {
                         return state.Error("Invalid identity on transaction output " + std::to_string(i));
                     }
