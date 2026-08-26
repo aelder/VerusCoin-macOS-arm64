@@ -134,3 +134,6 @@ src/cryptoconditions/compile
 *.dSYM
 
 configure~
+
+# Unpublished artifacts produced by the downstream local release workflow.
+/local-releases/

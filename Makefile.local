@@ -1,0 +1,37 @@
+SHELL := /bin/bash
+
+.PHONY: help verify build smoke bundle release github-preflight
+
+help:
+	@printf '%s\n' \
+	  'Local macOS arm64 downstream workflow' \
+	  '' \
+	  '  make -f Makefile.local verify           Verify upstream and patch provenance' \
+	  '  make -f Makefile.local build            Build native arm64 verusd and verus' \
+	  '  make -f Makefile.local smoke            Run isolated main and regtest tests' \
+	  '  make -f Makefile.local bundle           Create a checksummed local bundle' \
+	  '  make -f Makefile.local release          Verify, build, test, and bundle' \
+	  '  make -f Makefile.local github-preflight Check gh authentication only' \
+	  '' \
+	  'Nothing in this workflow pushes or publishes.'
+
+verify:
+	@./maintainer/verify.sh
+
+build:
+	@./maintainer/build-macos-arm64.sh
+
+smoke:
+	@./maintainer/smoke-macos-arm64.sh
+
+bundle:
+	@./maintainer/package-macos-arm64.sh
+
+release:
+	@./maintainer/verify.sh
+	@./maintainer/build-macos-arm64.sh
+	@./maintainer/smoke-macos-arm64.sh
+	@./maintainer/package-macos-arm64.sh
+
+github-preflight:
+	@./maintainer/github-preflight.sh
