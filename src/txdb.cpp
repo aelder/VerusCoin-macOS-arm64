@@ -2551,11 +2551,14 @@ bool CBlockTreeDB::blockOnchainActive(const uint256 &hash) {
     return true;
 }
 
-bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256&)> insertBlockIndex)
+bool CBlockTreeDB::LoadBlockIndexGuts(
+    boost::function<CBlockIndex*(const uint256&)> insertBlockIndex,
+    boost::function<void(uint64_t)> reportProgress)
 {
     boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
 
     pcursor->Seek(make_pair(DB_BLOCK_INDEX, uint256()));
+    uint64_t loadedRecordCount = 0;
 
     // Load mapBlockIndex
     while (pcursor->Valid()) {
@@ -2571,7 +2574,12 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                     printf("VerusHash 2.0 block header: %s\n", diskindex.ToString().c_str());
                 }
 #endif
-                CBlockIndex* pindexNew    = insertBlockIndex(diskindex.GetBlockHash());
+                const uint256 blockHash = diskindex.GetBlockHash();
+                if (blockHash != key.second)
+                {
+                    return error("LoadBlockIndex(): block index key/hash mismatch");
+                }
+                CBlockIndex* pindexNew    = insertBlockIndex(key.second);
                 pindexNew->pprev          = insertBlockIndex(diskindex.hashPrev);
                 pindexNew->SetHeight(diskindex.GetHeight());
                 pindexNew->nFile          = diskindex.nFile;
@@ -2592,19 +2600,14 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                 pindexNew->nSaplingValue  = diskindex.nSaplingValue;
 
                 // Consistency checks
-                auto header = pindexNew->GetBlockHeader();
-                uint256 hash = header.GetHash();
-                if (diskindex.hashPrev.IsNull() && hash != Params().consensus.hashGenesisBlock)
+                if (diskindex.hashPrev.IsNull() && key.second != Params().consensus.hashGenesisBlock)
                 {
                     return error("LoadBlockIndex(): prior block hash NULL on non-genesis block: %s\n", diskindex.ToString());
                 }
 
-                if (hash != pindexNew->GetBlockHash())
-                {
-                    printf("Error -- hashes don't match.\nheader.GetHash: %s\nGetBlockHash(): %s\non disk: %s\nin memory: %s\n",
-                           hash.GetHex().c_str(), pindexNew->GetBlockHash().GetHex().c_str(), diskindex.ToString().c_str(),  pindexNew->ToString().c_str());
-                    return error("LoadBlockIndex(): block header inconsistency detected: on-disk = %s, in-memory = %s",
-                                 diskindex.ToString(),  pindexNew->ToString());
+                loadedRecordCount++;
+                if (loadedRecordCount % 5000 == 0) {
+                    reportProgress(loadedRecordCount);
                 }
 
                 pcursor->Next();
@@ -2616,5 +2619,8 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
         }
     }
 
+    if (loadedRecordCount % 5000 != 0) {
+        reportProgress(loadedRecordCount);
+    }
     return true;
 }

@@ -7408,10 +7408,24 @@ bool static LoadBlockIndexDB()
 {
     const CChainParams& chainparams = Params();
     LogPrintf("%s: start loading guts\n", __func__);
-    if (!pblocktree->LoadBlockIndexGuts(InsertBlockIndex))
+    const int64_t blockIndexReadStart = GetTimeMillis();
+    if (!pblocktree->LoadBlockIndexGuts(
+            InsertBlockIndex,
+            [](uint64_t loadedRecordCount) {
+                LogPrintf(
+                    "init progress: Loading block index... %llu\n",
+                    (unsigned long long)loadedRecordCount);
+            }))
         return false;
+    LogPrintf(
+        " block index read %15dms\n",
+        GetTimeMillis() - blockIndexReadStart);
     LogPrintf("%s: loaded guts\n", __func__);
     boost::this_thread::interruption_point();
+
+    const uint64_t totalBlockIndexRecordCount = mapBlockIndex.size();
+    uint64_t linkedBlockIndexRecordCount = 0;
+    const int64_t blockIndexLinkStart = GetTimeMillis();
 
     // Calculate chainPower
     vector<pair<int, CBlockIndex*> > vSortedByHeight;
@@ -7423,6 +7437,9 @@ bool static LoadBlockIndexDB()
         //komodo_pindex_init(pindex,(int32_t)pindex->GetHeight());
     }
     //fprintf(stderr,"load blockindexDB paired %u\n",(uint32_t)time(NULL));
+    LogPrintf(
+        "init progress: Linking block index... 0/%llu\n",
+        (unsigned long long)totalBlockIndexRecordCount);
     sort(vSortedByHeight.begin(), vSortedByHeight.end());
     //fprintf(stderr,"load blockindexDB sorted %u\n",(uint32_t)time(NULL));
     BOOST_FOREACH(const PAIRTYPE(int, CBlockIndex*)& item, vSortedByHeight)
@@ -7490,7 +7507,18 @@ bool static LoadBlockIndexDB()
         if (pindex->IsValid(BLOCK_VALID_TREE) && (pindexBestHeader == NULL || CBlockIndexWorkComparator()(pindexBestHeader, pindex)))
             pindexBestHeader = pindex;
         //komodo_pindex_init(pindex,(int32_t)pindex->GetHeight());
+        linkedBlockIndexRecordCount++;
+        if (
+            linkedBlockIndexRecordCount % 5000 == 0
+            || linkedBlockIndexRecordCount
+                == totalBlockIndexRecordCount) {
+            LogPrintf(
+                "init progress: Linking block index... %llu/%llu\n",
+                (unsigned long long)linkedBlockIndexRecordCount,
+                (unsigned long long)totalBlockIndexRecordCount);
+        }
     }
+    LogPrintf(" block index link %15dms\n", GetTimeMillis() - blockIndexLinkStart);
     //fprintf(stderr,"load blockindexDB chained %u\n",(uint32_t)time(NULL));
 
     // Load block file info
