@@ -220,7 +220,8 @@ UniValue generate(const UniValue& params, bool fHelp)
     CPubKey pubKey;
 
     //throw an error if no script was provided
-    if (!reservekey.GetReservedKey(pubKey))
+    if (GetArg("-mineraddress", "").empty() &&
+        !reservekey.GetReservedKey(pubKey))
         throw JSONRPCError(RPC_INTERNAL_ERROR, "No coinbase script available (mining requires a wallet or -mineraddress)");
 
     {   // Don't keep cs_main locked

@@ -316,7 +316,8 @@ class CConstVerusSolutionVector
 
         static uint32_t Version(const std::vector<unsigned char> &vch)
         {
-            if (activationHeight.ActiveVersion(0x7fffffff) > 0)
+            if (vch.size() >= sizeof(CPBaaSSolutionDescriptor) &&
+                activationHeight.ActiveVersion(0x7fffffff) > 0)
             {
                 return CPBaaSSolutionDescriptor(vch).version;
             }
@@ -328,17 +329,14 @@ class CConstVerusSolutionVector
 
         static bool SetVersion(std::vector<unsigned char> &vch, uint32_t v)
         {
+            if (!activationHeight.active ||
+                vch.size() < sizeof(CPBaaSSolutionDescriptor))
+                return false;
+
             CPBaaSSolutionDescriptor psd = CPBaaSSolutionDescriptor(vch);
             psd.version = v;
-            if (activationHeight.active && vch.size() >= sizeof(CPBaaSSolutionDescriptor))
-            {
-                psd.SetVectorBase(vch);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            psd.SetVectorBase(vch);
+            return true;
         }
 
         static bool SetVersionByHeight(std::vector<unsigned char> &vch, uint32_t height)

@@ -2021,7 +2021,8 @@ void CheckVerusVaultAPIsValid()
 void CheckIdentityAPIsValid()
 {
     if (!chainActive.LastTip() ||
-        CConstVerusSolutionVector::activationHeight.ActiveVersion(chainActive.LastTip()->GetHeight()) < CConstVerusSolutionVector::activationHeight.ACTIVATE_IDENTITY)
+        (Params().NetworkIDString() != "regtest" &&
+         CConstVerusSolutionVector::activationHeight.ActiveVersion(chainActive.LastTip()->GetHeight()) < CConstVerusSolutionVector::activationHeight.ACTIVATE_IDENTITY))
     {
         throw JSONRPCError(RPC_INVALID_REQUEST, "Identity APIs not activated on blockchain.");
     }
@@ -15898,7 +15899,12 @@ UniValue registeridentity(const UniValue& params, bool fHelp)
         CValidationState state;
         {
             LOCK2(smartTransactionCS, mempool.cs);
-            relayTx = myAddtomempool(commitTx, &state);
+            if (Params().NetworkIDString() == "regtest")
+            {
+                relayTx = AcceptToMemoryPool(mempool, state, commitTx, true, true, nullptr, false);
+            }
+            else
+                relayTx = myAddtomempool(commitTx, &state);
         }
 
         // add to mem pool and relay

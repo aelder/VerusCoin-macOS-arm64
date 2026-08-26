@@ -113,7 +113,8 @@ bool Eval::Dispatch(const CC *cond, const CTransaction &txTo, unsigned int nIn, 
         case EVAL_IDENTITY_RECOVER:
         case EVAL_IDENTITY_COMMITMENT:
         case EVAL_IDENTITY_RESERVATION:
-            if (!chainActive.LastTip() || CConstVerusSolutionVector::activationHeight.ActiveVersion(chainActive.LastTip()->GetHeight() + 1) < CActivationHeight::ACTIVATE_IDENTITY)
+            if (!chainActive.LastTip() || (Params().NetworkIDString() != "regtest" &&
+                CConstVerusSolutionVector::activationHeight.ActiveVersion(chainActive.LastTip()->GetHeight() + 1) < CActivationHeight::ACTIVATE_IDENTITY))
             {
                 break;
             }

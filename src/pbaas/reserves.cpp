@@ -2824,7 +2824,8 @@ CReserveTransactionDescriptor::CReserveTransactionDescriptor(const CTransaction 
     int32_t solutionVersion = CConstVerusSolutionVector::activationHeight.ActiveVersion(nHeight);
 
     // reserve descriptor transactions cannot run until identity activates
-    if (!chainActive.LastTip() || solutionVersion < CConstVerusSolutionVector::activationHeight.ACTIVATE_IDENTITY)
+    if (!chainActive.LastTip() || (Params().NetworkIDString() != "regtest" &&
+        solutionVersion < CConstVerusSolutionVector::activationHeight.ACTIVATE_IDENTITY))
     {
         return;
     }

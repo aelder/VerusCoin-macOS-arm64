@@ -2699,6 +2699,9 @@ extern uint8_t ASSETCHAINS_PUBLIC,ASSETCHAINS_PRIVATE;
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
 {
+    if (Params().NetworkIDString() == "regtest")
+        return 10 * COIN;
+
     return(komodo_ac_block_subsidy(nHeight));
 }
 
