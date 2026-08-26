@@ -49,7 +49,7 @@ MACOSX_DEPLOYMENT_TARGET=13.0 make "$@" -C ./depends v=1 NO_PROTON=1 NO_QT=1 HOS
 # -mcpu=apple-m2 -mcpu=apple-m3 -mcpu=apple-m4 for M2, M3, M4 optimizations
 export CXXFLAGS="-DSSE2NEON_SUPPRESS_WARNINGS -mcpu=apple-m1 -O2 \
 -fwrapv -fno-strict-aliasing -Wno-deprecated-declarations \
--Wno-deprecated-builtins -Wno-enum-constexpr-conversion \
+-Wno-deprecated-builtins -Wno-enum-constexpr-conversion -Wno-error=main -Wno-error=nontrivial-memcall \
 -Wno-unknown-warning-option -Werror -Wno-error=attributes" 
 export CFLAGS="-DSSE2NEON_SUPPRESS_WARNINGS -mcpu=apple-m1 -O2"
 
