@@ -28,7 +28,10 @@ make -f Makefile.local release
 ```
 
 Generated artifacts and reports are written under the ignored
-`local-releases/` directory. The smoke tests use disposable data directories,
+`local-releases/` directory. Because the upstream dependency Makefiles do not
+support source paths containing spaces, builds use a reusable detached
+worktree under `/private/tmp/veruscoin-macos-arm64-<commit>`. The smoke tests
+use disposable data directories,
 bind RPC only to `127.0.0.1`, disable peer discovery and listening, disable the
 wallet, verify the patched shielded-address RPC, and mine only on isolated
 regtest.
