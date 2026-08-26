@@ -298,9 +298,16 @@ TransactionBuilderResult TransactionBuilder::Build(bool throwTxWithPartialSig)
         view.SetBackend(viewMemPool);
 
         CReserveTransactionDescriptor rtxd(mtx, view, chainActive.Height() + 1);
-        reserveChange = ((rtxd.ReserveInputMap() - rtxd.ReserveOutputMap()) - reserveFee).CanonicalMap();
+        // The reserve descriptor intentionally remains invalid until VerusID
+        // activates. Preserve standard transparent/Sapling builder accounting
+        // before then; reserve accounting is unavailable and cannot apply.
+        bool reserveAccountingActive =
+            CConstVerusSolutionVector::activationHeight.ActiveVersion(chainActive.Height() + 1) >=
+            CActivationHeight::ACTIVATE_IDENTITY;
+        if (reserveAccountingActive)
+            reserveChange = ((rtxd.ReserveInputMap() - rtxd.ReserveOutputMap()) - reserveFee).CanonicalMap();
 
-        if (!rtxd.IsValid() || reserveChange.HasNegative())
+        if (reserveAccountingActive && (!rtxd.IsValid() || reserveChange.HasNegative()))
         {
             CReserveTransactionDescriptor checkRtxd(mtx, view, chainActive.Height() + 1);
             if (rtxd.IsValid())
@@ -362,7 +369,7 @@ TransactionBuilderResult TransactionBuilder::Build(bool throwTxWithPartialSig)
             return TransactionBuilderResult("Change cannot be negative, native: " + std::to_string(change) + "\nreserves: " + reserveChange.ToUniValue().write());
         }
 
-        if ((rtxd.NativeFees() - this->fee) != change)
+        if (reserveAccountingActive && (rtxd.NativeFees() - this->fee) != change)
         {
             //UniValue jsonTx(UniValue::VOBJ);
             //TxToUniv(mtx, uint256(), jsonTx);
