@@ -105,8 +105,8 @@ PY
 (
   cd "${RELEASE_ROOT}"
   COPYFILE_DISABLE=1 /usr/bin/tar -czf "${ARCHIVE}" "${BUNDLE_NAME}"
+  /usr/bin/shasum -a 256 "${BUNDLE_NAME}.tgz" >"${BUNDLE_NAME}.tgz.sha256"
 )
-/usr/bin/shasum -a 256 "${ARCHIVE}" >"${ARCHIVE}.sha256"
 
 printf '[PASS] local unsigned release bundle\n'
 printf 'Archive:  %s\n' "${ARCHIVE}"
