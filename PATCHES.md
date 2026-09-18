@@ -32,7 +32,7 @@ src/txdb.h
 `maintainer/verify.sh` enforces both the ordered commit subjects and this file
 allowlist before a build or bundle can proceed.
 
-The former Xcode warning patch is retired pending build validation because upstream
-replaced the architecture-specific build implementation. Bootstrap TLS uses the
+The former Xcode warning patch is retired: upstream replaced the architecture-specific
+build implementation, and the native v1.2.18 build passes without it. Bootstrap TLS uses the
 upstream system trust-store setup, including the downstream resume requests.
 Block-index callbacks retain upstream’s migration to `std::function`.

@@ -25,7 +25,7 @@ REPORT_DIRECTORY="${REPOSITORY_ROOT}/local-releases/reports"
 /bin/mkdir -p "${REPORT_DIRECTORY}"
 BUILD_LOG="${REPORT_DIRECTORY}/build-${RELEASE_TAG}.log"
 HEAD_COMMIT="$(git -C "${REPOSITORY_ROOT}" rev-parse HEAD)"
-BUILD_WORKSPACE="/private/tmp/veruscoin-macos-arm64-${HEAD_COMMIT:0:12}"
+BUILD_WORKSPACE="${VERUS_BUILD_WORKSPACE:-/private/tmp/veruscoin-macos-arm64-${HEAD_COMMIT:0:12}}"
 
 if [[ -d "${BUILD_WORKSPACE}" ]]; then
   [[ "$(git -C "${BUILD_WORKSPACE}" rev-parse HEAD 2>/dev/null)" == \
