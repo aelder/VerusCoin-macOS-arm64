@@ -823,6 +823,7 @@ static bool readBootstrapState(
 
 static bool configureVerifiedHTTPS(CURL *curl, const std::string &url)
 {
+    SetCurlCATrust(curl);
     return curl &&
         curl_easy_setopt(curl, CURLOPT_URL, url.c_str()) == CURLE_OK &&
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L) == CURLE_OK &&

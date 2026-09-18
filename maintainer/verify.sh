@@ -32,7 +32,6 @@ git -C "${REPOSITORY_ROOT}" merge-base --is-ancestor \
   "${UPSTREAM_COMMIT}" HEAD || fail "HEAD is not based on the pinned upstream commit"
 
 EXPECTED_PATCH_SUBJECTS=(
-  "build(macOS): tolerate Xcode 26 warning classes"
   "fix(rpc): make z_validateaddress safe without a wallet"
   "fix: honor regtest and testnet network selection"
   "compat(regtest): support isolated mining and identity flows"
@@ -71,8 +70,7 @@ EXPECTED_SOURCE_CHANGES="$(
     src/rpc/pbaasrpc.cpp \
     src/transaction_builder.cpp \
     src/txdb.cpp \
-    src/txdb.h \
-    zcutil/build-mac-arm.sh
+    src/txdb.h
 )"
 ACTUAL_SOURCE_CHANGES="$(
   git -C "${REPOSITORY_ROOT}" diff \
@@ -88,7 +86,7 @@ git -C "${REPOSITORY_ROOT}" diff --check "${UPSTREAM_COMMIT}..HEAD"
 printf '[PASS] upstream %s resolves to %s\n' \
   "${UPSTREAM_TAG}" \
   "${UPSTREAM_COMMIT}"
-printf '[PASS] seven patch commits are present in reviewed order\n'
-printf '[PASS] Core source delta is restricted to 14 reviewed files\n'
+printf '[PASS] six patch commits are present in reviewed order\n'
+printf '[PASS] Core source delta is restricted to 13 reviewed files\n'
 printf '[PASS] clean downstream HEAD %s\n' \
   "$(git -C "${REPOSITORY_ROOT}" rev-parse HEAD)"

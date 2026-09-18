@@ -4,7 +4,7 @@ This repository is an unofficial derivative of
 [`VerusCoin/VerusCoin`](https://github.com/VerusCoin/VerusCoin). It is not an
 official Verus release and is not endorsed by the VerusCoin project.
 
-The maintained branch starts from upstream `v1.2.17-6` and carries seven
+The maintained branch starts from upstream `v1.2.18` and carries six
 reviewable compatibility, safety, recovery, and observability commits for the
 native Apple Silicon desktop wallet. See [`UPSTREAM.md`](UPSTREAM.md) for the
 immutable base and [`PATCHES.md`](PATCHES.md) for the ordered delta.
