@@ -593,7 +593,7 @@ UniValue CBlockTreeDB::Snapshot(int top)
 	UniValue obj(UniValue::VOBJ);
 	obj.push_back( make_pair("addr", it->second.c_str() ) );
 	char amount[32];
-	sprintf(amount, "%.8f", (double) it->first / COIN);
+	snprintf(amount, sizeof(amount), "%.8f", (double) it->first / COIN);
 	obj.push_back( make_pair("amount", amount) );
 	total += it->first;
 	addressesSorted.push_back(obj);
@@ -2552,8 +2552,8 @@ bool CBlockTreeDB::blockOnchainActive(const uint256 &hash) {
 }
 
 bool CBlockTreeDB::LoadBlockIndexGuts(
-    boost::function<CBlockIndex*(const uint256&)> insertBlockIndex,
-    boost::function<void(uint64_t)> reportProgress)
+    std::function<CBlockIndex*(const uint256&)> insertBlockIndex,
+    std::function<void(uint64_t)> reportProgress)
 {
     boost::scoped_ptr<CDBIterator> pcursor(NewIterator());
 

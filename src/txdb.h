@@ -16,8 +16,6 @@
 #include <vector>
 #include <univalue.h>
 
-#include <boost/function.hpp>
-
 class CBlockIndex;
 struct CDiskTxPos;
 struct CAddressUnspentKey;
@@ -111,12 +109,12 @@ private:
 public:
     bool WriteBatchSync(const std::vector<std::pair<int, const CBlockFileInfo*> >& fileInfo, int nLastFile, const std::vector<const CBlockIndex*>& blockinfo);
     bool EraseBatchSync(const std::vector<const CBlockIndex*>& blockinfo);
-    bool ReadBlockFileInfo(int nFile, CBlockFileInfo &fileinfo);
+    bool ReadBlockFileInfo(int nFile, CBlockFileInfo &info);
     bool ReadLastBlockFile(int &nFile);
-    bool WriteReindexing(bool fReindex);
-    bool ReadReindexing(bool &fReindex);
+    bool WriteReindexing(bool fReindexing);
+    bool ReadReindexing(bool &fReindexing);
     bool ReadTxIndex(const uint256 &txid, CDiskTxPos &pos);
-    bool WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos> > &list);
+    bool WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos> > &vect);
     bool ReadSpentIndex(CSpentIndexKey &key, CSpentIndexValue &value);
     bool UpdateSpentIndex(const std::vector<CSpentIndexDbEntry> &vect);
     bool UpdateAddressUnspentIndex(const std::vector<CAddressUnspentDbEntry> &vect);
@@ -133,8 +131,8 @@ public:
     bool WriteFlag(const std::string &name, bool fValue);
     bool ReadFlag(const std::string &name, bool &fValue);
     bool LoadBlockIndexGuts(
-        boost::function<CBlockIndex*(const uint256&)> insertBlockIndex,
-        boost::function<void(uint64_t)> reportProgress);
+        std::function<CBlockIndex*(const uint256&)> insertBlockIndex,
+        std::function<void(uint64_t)> reportProgress);
     bool blockOnchainActive(const uint256 &hash);
     UniValue Snapshot(int top);
     UniValue GenerateAdjustmentTransactions(const CCurrencyValueMap &currencyPercentages,

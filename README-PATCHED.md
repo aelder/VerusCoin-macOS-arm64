@@ -4,7 +4,7 @@ This repository is an unofficial derivative of
 [`VerusCoin/VerusCoin`](https://github.com/VerusCoin/VerusCoin). It is not an
 official Verus release and is not endorsed by the VerusCoin project.
 
-The maintained branch starts from upstream `v1.2.17-6` and carries seven
+The maintained branch starts from upstream `v1.2.18` and carries six
 reviewable compatibility, safety, recovery, and observability commits for the
 native Apple Silicon desktop wallet. See [`UPSTREAM.md`](UPSTREAM.md) for the
 immutable base and [`PATCHES.md`](PATCHES.md) for the ordered delta.
@@ -30,7 +30,9 @@ make -f Makefile.local release
 Generated artifacts and reports are written under the ignored
 `local-releases/` directory. Because the upstream dependency Makefiles do not
 support source paths containing spaces, builds use a reusable detached
-worktree under `/private/tmp/veruscoin-macos-arm64-<commit>`. The smoke tests
+worktree under `/private/tmp/veruscoin-macos-arm64-<commit>`. Set `VERUS_BUILD_WORKSPACE` to reuse an existing no-spaces worktree after
+checking it out at the exact release commit. The build still rejects a dirty
+worktree or a different commit. The smoke tests
 use disposable data directories,
 bind RPC only to `127.0.0.1`, disable peer discovery and listening, disable the
 wallet, verify the patched shielded-address RPC, and mine only on isolated

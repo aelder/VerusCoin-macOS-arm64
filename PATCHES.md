@@ -1,16 +1,15 @@
 # Downstream patch series
 
-The branch applies these commits in order after upstream `v1.2.17-6`:
+The branch applies these commits in order after upstream `v1.2.18`:
 
 | Order | Commit | Purpose |
 | --- | --- | --- |
-| 1 | `d394e30d5` | Keep two Xcode 26 warning classes from becoming build-stopping errors. |
-| 2 | `214ceec41` | Prevent `z_validateaddress` from dereferencing a null wallet. |
-| 3 | `74f90fd4c` | Honor declared `-regtest` and `-testnet` base-network selection. |
-| 4 | `3ede61e7e` | Make isolated regtest mining and identity flows coherent. |
-| 5 | `18a14a438` | Preserve transparent/Sapling construction before identity activation. |
-| 6 | `24048004a` | Authenticate, verify, resume, and safely extract bootstrap archives. |
-| 7 | `4764ae8ca` | Add bounded block-index progress and avoid duplicate header hashing. |
+| 1 | `990912a34` | Prevent `z_validateaddress` from dereferencing a null wallet. |
+| 2 | `0cdd888c0` | Honor declared `-regtest` and `-testnet` base-network selection. |
+| 3 | `c9e321983` | Make isolated regtest mining and identity flows coherent. |
+| 4 | `bf0914e6a` | Preserve transparent/Sapling construction before identity activation. |
+| 5 | `2ea6d1986` | Authenticate, verify, resume, and safely extract bootstrap archives. |
+| 6 | `3261d08c4` | Add bounded block-index progress and avoid duplicate header hashing. |
 
 The expected upstream source delta is restricted to:
 
@@ -28,8 +27,12 @@ src/rpc/pbaasrpc.cpp
 src/transaction_builder.cpp
 src/txdb.cpp
 src/txdb.h
-zcutil/build-mac-arm.sh
 ```
 
 `maintainer/verify.sh` enforces both the ordered commit subjects and this file
 allowlist before a build or bundle can proceed.
+
+The former Xcode warning patch is retired: upstream replaced the architecture-specific
+build implementation, and the native v1.2.18 build passes without it. Bootstrap TLS uses the
+upstream system trust-store setup, including the downstream resume requests.
+Block-index callbacks retain upstream’s migration to `std::function`.
