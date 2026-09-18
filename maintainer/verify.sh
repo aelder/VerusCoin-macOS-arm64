@@ -45,6 +45,7 @@ while IFS= read -r SUBJECT; do
 done < <(
   git -C "${REPOSITORY_ROOT}" log \
     --reverse \
+    --ancestry-path \
     --format=%s \
     "${UPSTREAM_COMMIT}..HEAD"
 )
